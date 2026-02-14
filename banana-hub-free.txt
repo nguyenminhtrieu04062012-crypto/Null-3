@@ -1,179 +1,210 @@
 --[[
-    NULL REMEUM - WHITE EDITION (ALL-IN-ONE)
-    Giao diện: Fluent UI (Light Theme)
-    Nút Đóng/Mở di động tích hợp
+    NULL REMEUM - WHITE EDITION (UI ONLY)
+    Phiên bản: Giao diện sạch + Key System
 ]]
 
+-- 1. LOAD THƯ VIỆN FLUENT UI
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
+-- 2. TẠO NÚT ĐÓNG/MỞ MENU TRÊN MÀN HÌNH (CHO MOBILE)
+do
+    if game.CoreGui:FindFirstChild("NullRemeumToggle") then
+        game.CoreGui.NullRemeumToggle:Destroy()
+    end
+
+    local ScreenGui = Instance.new("ScreenGui")
+    local ToggleButton = Instance.new("TextButton")
+    local UICorner = Instance.new("UICorner")
+    local UIStroke = Instance.new("UIStroke")
+
+    ScreenGui.Name = "NullRemeumToggle"
+    ScreenGui.Parent = game:GetService("CoreGui")
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+    ToggleButton.Name = "ToggleButton"
+    ToggleButton.Parent = ScreenGui
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleButton.Position = UDim2.new(0.1, 0, 0.1, 0)
+    ToggleButton.Size = UDim2.new(0, 45, 0, 45)
+    ToggleButton.Font = Enum.Font.GothamBold
+    ToggleButton.Text = "N"
+    ToggleButton.TextColor3 = Color3.fromRGB(30, 30, 30)
+    ToggleButton.TextSize = 20.0
+    ToggleButton.Draggable = true
+    ToggleButton.AutoButtonColor = true
+
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = ToggleButton
+
+    UIStroke.Parent = ToggleButton
+    UIStroke.Thickness = 2
+    UIStroke.Color = Color3.fromRGB(200, 200, 200)
+
+    -- Logic: Giả lập phím RightControl để đóng mở UI Fluent
+    ToggleButton.MouseButton1Click:Connect(function()
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.RightControl, false, game)
+        game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.RightControl, false, game)
+    end)
+end
+
 --------------------------------------------------------------------------------
--- TẠO NÚT ĐÓNG/MỞ MENU (FLOATING BUTTON)
---------------------------------------------------------------------------------
-local ScreenGui = Instance.new("ScreenGui")
-local ToggleButton = Instance.new("TextButton")
-local UICorner = Instance.new("UICorner")
-
-ScreenGui.Name = "NullRemeumToggle"
-ScreenGui.Parent = game:GetService("CoreGui")
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Parent = ScreenGui
-ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Màu trắng
-ToggleButton.Position = UDim2.new(0.1, 0, 0.1, 0)
-ToggleButton.Size = UDim2.new(0, 50, 0, 50)
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.Text = "NULL"
-ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ToggleButton.TextSize = 14.0
-ToggleButton.Draggable = true -- Có thể kéo đi khắp màn hình
-
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = ToggleButton
-
-ToggleButton.MouseButton1Click:Connect(function()
-    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.RightControl, false, game)
-    game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.RightControl, false, game)
-end)
-
---------------------------------------------------------------------------------
--- HỆ THỐNG KEY & SCRIPT CHÍNH
+-- HÀM: LOAD MENU CHÍNH (SAU KHI NHẬP ĐÚNG KEY)
 --------------------------------------------------------------------------------
 local function LoadMainScript()
     local Window = Fluent:CreateWindow({
-        Title = "Null Remeum | Premium Edition",
-        SubTitle = "v3.0 - All Seas Supported",
+        Title = "Null Remeum | Premium",
+        SubTitle = "White Edition",
         TabWidth = 160,
         Size = UDim2.fromOffset(580, 460),
-        Acrylic = false, -- Tắt Acrylic để màu trắng rõ hơn
-        Theme = "Light", -- GIAO DIỆN MÀU TRẮNG
+        Acrylic = false, 
+        Theme = "Light", -- Giao diện sáng
         MinimizeKey = Enum.KeyCode.RightControl
     })
 
     local Tabs = {
-        Main = Window:AddTab({ Title = "Main Farm", Icon = "crosshair" }),
-        SeaFeatures = Window:AddTab({ Title = "Sea Specials", Icon = "map" }),
-        Items = Window:AddTab({ Title = "Items & Boss", Icon = "sword" }),
+        Main = Window:AddTab({ Title = "Main Farm", Icon = "home" }),
+        Sea = Window:AddTab({ Title = "Sea Events", Icon = "anchor" }),
+        Items = Window:AddTab({ Title = "Items / PVP", Icon = "sword" }),
         Stats = Window:AddTab({ Title = "Stats", Icon = "bar-chart" }),
-        Teleport = Window:AddTab({ Title = "Teleport", Icon = "navigation" }),
+        Teleport = Window:AddTab({ Title = "Teleport", Icon = "map-pin" }),
         Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
     }
 
-    -- --- CÀI ĐẶT BIẾN ---
     local Options = Fluent.Options
 
     -- >>> TAB: MAIN FARM <<<
-    do
-        Tabs.Main:AddParagraph({Title = "Hệ thống Farm", Content = "Tự động hoàn toàn nhiệm vụ và quái."})
-        Tabs.Main:AddToggle("AutoFarm", {Title = "Auto Farm Level", Default = false})
-        Tabs.Main:AddToggle("FastAttack", {Title = "Fast Attack (Đánh nhanh)", Default = true})
-        Tabs.Main:AddToggle("AutoBuso", {Title = "Auto Buso Haki", Default = true})
-        
-        Tabs.Main:AddDropdown("Weapon", {
-            Title = "Chọn Vũ Khí",
-            Values = {"Melee", "Sword", "Fruit"},
-            Default = 1,
-        })
-    end
+    Tabs.Main:AddParagraph({Title = "Trạng thái", Content = "Chọn vũ khí và bật Auto Farm."})
+    
+    Tabs.Main:AddDropdown("WeaponSelect", {
+        Title = "Chọn Vũ Khí (Weapon)",
+        Values = {"Melee", "Sword", "Blox Fruit"},
+        Default = 1,
+        Callback = function(Value)
+            -- Code chọn vũ khí ở đây
+        end
+    })
 
-    -- >>> TAB: SEA FEATURES (GOM TẤT CẢ SEA) <<<
-    do
-        Tabs.SeaFeatures:AddSection("Sea 1")
-        Tabs.SeaFeatures:AddButton({Title = "Auto Saber Quest", Callback = function() print("Running Saber...") end})
+    Tabs.Main:AddToggle("AutoFarmLevel", {
+        Title = "Auto Farm Level",
+        Default = false,
+        Callback = function(Value)
+            -- Code Auto Farm Level ở đây
+            -- while Options.AutoFarmLevel.Value do ... end
+            print("Auto Farm Level:", Value)
+        end
+    })
 
-        Tabs.SeaFeatures:AddSection("Sea 2")
-        Tabs.SeaFeatures:AddToggle("AutoRaid", {Title = "Auto Raid (Dungeon)", Default = false})
-        Tabs.SeaFeatures:AddToggle("AutoFactory", {Title = "Auto Factory", Default = false})
+    Tabs.Main:AddToggle("FastAttack", {
+        Title = "Fast Attack (Đánh nhanh)",
+        Default = true,
+        Callback = function(Value)
+            print("Fast Attack:", Value)
+        end
+    })
+    
+    Tabs.Main:AddToggle("AutoBuso", {Title = "Auto Buso Haki", Default = true })
 
-        Tabs.SeaFeatures:AddSection("Sea 3")
-        Tabs.SeaFeatures:AddToggle("AutoBone", {Title = "Auto Farm Bone (Xương)", Default = false})
-        Tabs.SeaFeatures:AddToggle("AutoElite", {Title = "Auto Elite Hunter", Default = false})
-        Tabs.SeaFeatures:AddToggle("AutoKitsune", {Title = "Auto Kitsune Island", Default = false})
-    end
+    -- >>> TAB: SEA FEATURES <<<
+    Tabs.Sea:AddSection("Sea 2 Features")
+    Tabs.Sea:AddToggle("AutoRaid", {Title = "Auto Dungeon (Raid)", Default = false })
+    Tabs.Sea:AddToggle("AutoFactory", {Title = "Auto Factory", Default = false })
 
-    -- >>> TAB: ITEMS (CDK, SOUL GUITAR...) <<<
-    do
-        Tabs.Items:AddSection("Legendary Items")
-        Tabs.Items:AddToggle("AutoCDK", {Title = "Auto Cursed Dual Katana", Default = false})
-        Tabs.Items:AddToggle("AutoSoulGuitar", {Title = "Auto Soul Guitar", Default = false})
-        Tabs.Items:AddToggle("AutoTushita", {Title = "Auto Tushita Quest", Default = false})
-        Tabs.Items:AddToggle("AutoYama", {Title = "Auto Yama Quest", Default = false})
-    end
+    Tabs.Sea:AddSection("Sea 3 Features")
+    Tabs.Sea:AddToggle("AutoBone", {Title = "Auto Farm Bone", Default = false })
+    Tabs.Sea:AddToggle("AutoKitsune", {Title = "Auto Kitsune Event", Default = false })
+
+    -- >>> TAB: ITEMS <<<
+    Tabs.Items:AddSection("Swords")
+    Tabs.Items:AddToggle("AutoCDK", {Title = "Auto Cursed Dual Katana", Default = false })
+    Tabs.Items:AddToggle("AutoTushita", {Title = "Auto Tushita", Default = false })
+    Tabs.Items:AddToggle("AutoYama", {Title = "Auto Yama", Default = false })
+    
+    Tabs.Items:AddSection("Guns")
+    Tabs.Items:AddToggle("AutoSoulGuitar", {Title = "Auto Soul Guitar", Default = false })
 
     -- >>> TAB: TELEPORT <<<
-    do
-        Tabs.Teleport:AddDropdown("TeleportIsland", {
-            Title = "Dịch chuyển Đảo",
-            Values = {"Sea 1", "Sea 2", "Sea 3", "Mansion", "Cafe", "Hydra Island"},
-            Callback = function(v) print("Teleport to " .. v) end
-        })
-        Tabs.Teleport:AddToggle("ESPFruit", {Title = "ESP Trái Ác Quỷ", Default = false})
-    end
+    Tabs.Teleport:AddDropdown("TeleportIsland", {
+        Title = "Dịch chuyển nhanh",
+        Values = {"Sea 1", "Sea 2", "Sea 3", "Mansion", "Hydra", "Castle"},
+        Callback = function(Value)
+            print("Teleporting to:", Value)
+        end
+    })
 
     -- >>> TAB: SETTINGS <<<
-    do
-        Tabs.Settings:AddSection("Cấu hình")
-        Tabs.Settings:AddButton({
-            Title = "Hủy Key / Đăng xuất",
-            Callback = function() Window:Destroy() end
-        })
-    end
+    SaveManager:SetLibrary(Fluent)
+    InterfaceManager:SetLibrary(Fluent)
+    SaveManager:IgnoreThemeSettings()
+    SaveManager:SetIgnoreIndexes({})
+    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+    SaveManager:BuildConfigSection(Tabs.Settings)
 
     Window:SelectTab(1)
-    Fluent:Notify({Title = "Null Remeum", Content = "Đã nạp thành công giao diện White Edition!", Duration = 5})
+    
+    -- Thông báo chào mừng
+    Fluent:Notify({
+        Title = "Null Remeum",
+        Content = "Script đã tải thành công!",
+        Duration = 5
+    })
 end
 
 --------------------------------------------------------------------------------
--- CỬA SỔ KEY SYSTEM (XUẤT HIỆN ĐẦU TIÊN)
+-- HỆ THỐNG KEY SYSTEM (CHẠY ĐẦU TIÊN)
 --------------------------------------------------------------------------------
-local KeyWindow = Fluent:CreateWindow({
-    Title = "Null Remeum | Key System",
-    SubTitle = "Vui lòng nhập Key",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(450, 300),
-    Acrylic = false,
-    Theme = "Light", -- Màu trắng
-    MinimizeKey = Enum.KeyCode.RightControl
-})
+local function LoadKeySystem()
+    local KeyWindow = Fluent:CreateWindow({
+        Title = "Null Remeum | Key System",
+        SubTitle = "Security Check",
+        TabWidth = 160,
+        Size = UDim2.fromOffset(500, 320),
+        Acrylic = false,
+        Theme = "Light",
+        MinimizeKey = Enum.KeyCode.RightControl
+    })
 
-local KeyTab = KeyWindow:AddTab({ Title = "Hệ thống Key", Icon = "key" })
+    local KeyTab = KeyWindow:AddTab({ Title = "Verify Key", Icon = "lock" })
+    local KeyInputVal = ""
+    local TrueKey = "NULL-PREMIUM" -- ĐẶT KEY CỦA BẠN TẠI ĐÂY
 
-local InputKey = ""
-local MyKey = "NULL-PREMIUM" -- Key mặc định
+    KeyTab:AddParagraph({
+        Title = "Hướng dẫn",
+        Content = "Vui lòng lấy Key để sử dụng Script. Key: " .. TrueKey
+    })
 
-KeyTab:AddInput("KeyInput", {
-    Title = "Nhập Key của bạn",
-    Default = "",
-    Placeholder = "Dán key tại đây...",
-    Callback = function(Value) InputKey = Value end
-})
-
-KeyTab:AddButton({
-    Title = "Kiểm tra Key",
-    Callback = function()
-        if InputKey == MyKey then
-            Fluent:Notify({Title = "Thành công", Content = "Đang mở Menu chính...", Duration = 3})
-            KeyWindow:Destroy()
-            LoadMainScript()
-        else
-            Fluent:Notify({Title = "Sai Key", Content = "Vui lòng kiểm tra lại key của bạn!", Duration = 3})
+    KeyTab:AddInput("InputKey", {
+        Title = "Nhập Key",
+        Default = "",
+        Placeholder = "Paste Key Here...",
+        Callback = function(Value)
+            KeyInputVal = Value
         end
-    end
-})
+    })
 
-KeyTab:AddButton({
-    Title = "Lấy Key (Get Key)",
-    Callback = function()
-        setclipboard("https://link-lay-key.com/null-remeum")
-        Fluent:Notify({Title = "Thông báo", Content = "Đã copy link lấy key vào bộ nhớ!", Duration = 5})
-    end
-})
+    KeyTab:AddButton({
+        Title = "Kiểm tra Key (Check Key)",
+        Callback = function()
+            if KeyInputVal == TrueKey then
+                Fluent:Notify({Title = "Thành công", Content = "Key chính xác! Đang tải Menu...", Duration = 3})
+                KeyWindow:Destroy() -- Tắt bảng Key
+                wait(0.5)
+                LoadMainScript() -- Mở bảng Farm chính
+            else
+                Fluent:Notify({Title = "Lỗi", Content = "Key sai hoặc chưa nhập!", Duration = 3})
+            end
+        end
+    })
 
--- Thông báo ban đầu
-Fluent:Notify({
-    Title = "Null Remeum",
-    Content = "Bấm vào nút 'NULL' màu trắng để đóng/mở Menu!",
-    Duration = 7
-})
+    KeyTab:AddButton({
+        Title = "Lấy Key (Get Key Link)",
+        Callback = function()
+            setclipboard("https://example.com/getkey")
+            Fluent:Notify({Title = "Link Copied", Content = "Đã copy link lấy key!", Duration = 3})
+        end
+    })
+end
+
+-- BẮT ĐẦU CHẠY SCRIPT
+LoadKeySystem()
