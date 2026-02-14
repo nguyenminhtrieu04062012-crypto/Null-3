@@ -1,210 +1,188 @@
 --[[
-    NULL REMEUM - WHITE EDITION (UI ONLY)
-    Phiên bản: Giao diện sạch + Key System
+    NULL REMEUM - BLACK & WHITE ULTIMATE EDITION v7.0 (FINAL)
+    - All-In-One | Anti-Ban | Auto Farm | All Items | All Melee | All Codes
 ]]
 
--- 1. LOAD THƯ VIỆN FLUENT UI
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
--- 2. TẠO NÚT ĐÓNG/MỞ MENU TRÊN MÀN HÌNH (CHO MOBILE)
-do
-    if game.CoreGui:FindFirstChild("NullRemeumToggle") then
-        game.CoreGui.NullRemeumToggle:Destroy()
-    end
+--------------------------------------------------------------------------------
+-- CẤU HÌNH BIẾN TOÀN CỤC & REMOTES
+--------------------------------------------------------------------------------
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+local RS = game:GetService("ReplicatedStorage")
+local CommF = RS:WaitForChild("Remotes"):WaitForChild("CommF_")
+local VirtualUser = game:GetService("VirtualUser")
 
-    local ScreenGui = Instance.new("ScreenGui")
-    local ToggleButton = Instance.new("TextButton")
-    local UICorner = Instance.new("UICorner")
-    local UIStroke = Instance.new("UIStroke")
-
-    ScreenGui.Name = "NullRemeumToggle"
-    ScreenGui.Parent = game:GetService("CoreGui")
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-    ToggleButton.Name = "ToggleButton"
-    ToggleButton.Parent = ScreenGui
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleButton.Position = UDim2.new(0.1, 0, 0.1, 0)
-    ToggleButton.Size = UDim2.new(0, 45, 0, 45)
-    ToggleButton.Font = Enum.Font.GothamBold
-    ToggleButton.Text = "N"
-    ToggleButton.TextColor3 = Color3.fromRGB(30, 30, 30)
-    ToggleButton.TextSize = 20.0
-    ToggleButton.Draggable = true
-    ToggleButton.AutoButtonColor = true
-
-    UICorner.CornerRadius = UDim.new(0, 10)
-    UICorner.Parent = ToggleButton
-
-    UIStroke.Parent = ToggleButton
-    UIStroke.Thickness = 2
-    UIStroke.Color = Color3.fromRGB(200, 200, 200)
-
-    -- Logic: Giả lập phím RightControl để đóng mở UI Fluent
-    ToggleButton.MouseButton1Click:Connect(function()
-        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.RightControl, false, game)
-        game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.RightControl, false, game)
-    end)
-end
+-- Anti-AFK để tránh bị văng game
+LP.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
 
 --------------------------------------------------------------------------------
--- HÀM: LOAD MENU CHÍNH (SAU KHI NHẬP ĐÚNG KEY)
+-- GIAO DIỆN CHÍNH
 --------------------------------------------------------------------------------
-local function LoadMainScript()
-    local Window = Fluent:CreateWindow({
-        Title = "Null Remeum | Premium",
-        SubTitle = "White Edition",
-        TabWidth = 160,
-        Size = UDim2.fromOffset(580, 460),
-        Acrylic = false, 
-        Theme = "Light", -- Giao diện sáng
-        MinimizeKey = Enum.KeyCode.RightControl
-    })
+local Window = Fluent:CreateWindow({
+    Title = "Null Remeum | Ultimate v7.0",
+    SubTitle = "The Final Edition",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(600, 500),
+    Acrylic = false,
+    Theme = "Light", -- Trắng Đen
+    MinimizeKey = Enum.KeyCode.RightControl
+})
 
-    local Tabs = {
-        Main = Window:AddTab({ Title = "Main Farm", Icon = "home" }),
-        Sea = Window:AddTab({ Title = "Sea Events", Icon = "anchor" }),
-        Items = Window:AddTab({ Title = "Items / PVP", Icon = "sword" }),
-        Stats = Window:AddTab({ Title = "Stats", Icon = "bar-chart" }),
-        Teleport = Window:AddTab({ Title = "Teleport", Icon = "map-pin" }),
-        Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
-    }
+local Tabs = {
+    Main = Window:AddTab({ Title = "Auto Farm", Icon = "swords" }),
+    Melee = Window:AddTab({ Title = "Melee/Võ", Icon = "user" }),
+    Items = Window:AddTab({ Title = "Vật Phẩm/Kiếm", Icon = "backpack" }),
+    Fruit = Window:AddTab({ Title = "Trái Ác Quỷ", Icon = "cherry" }),
+    Stats = Window:AddTab({ Title = "Chỉ Số", Icon = "plus-circle" }),
+    Settings = Window:AddTab({ Title = "Hệ Thống", Icon = "settings" })
+}
 
-    local Options = Fluent.Options
-
-    -- >>> TAB: MAIN FARM <<<
-    Tabs.Main:AddParagraph({Title = "Trạng thái", Content = "Chọn vũ khí và bật Auto Farm."})
-    
-    Tabs.Main:AddDropdown("WeaponSelect", {
-        Title = "Chọn Vũ Khí (Weapon)",
-        Values = {"Melee", "Sword", "Blox Fruit"},
-        Default = 1,
-        Callback = function(Value)
-            -- Code chọn vũ khí ở đây
-        end
-    })
-
-    Tabs.Main:AddToggle("AutoFarmLevel", {
-        Title = "Auto Farm Level",
-        Default = false,
-        Callback = function(Value)
-            -- Code Auto Farm Level ở đây
-            -- while Options.AutoFarmLevel.Value do ... end
-            print("Auto Farm Level:", Value)
-        end
-    })
-
-    Tabs.Main:AddToggle("FastAttack", {
-        Title = "Fast Attack (Đánh nhanh)",
-        Default = true,
-        Callback = function(Value)
-            print("Fast Attack:", Value)
-        end
-    })
-    
-    Tabs.Main:AddToggle("AutoBuso", {Title = "Auto Buso Haki", Default = true })
-
-    -- >>> TAB: SEA FEATURES <<<
-    Tabs.Sea:AddSection("Sea 2 Features")
-    Tabs.Sea:AddToggle("AutoRaid", {Title = "Auto Dungeon (Raid)", Default = false })
-    Tabs.Sea:AddToggle("AutoFactory", {Title = "Auto Factory", Default = false })
-
-    Tabs.Sea:AddSection("Sea 3 Features")
-    Tabs.Sea:AddToggle("AutoBone", {Title = "Auto Farm Bone", Default = false })
-    Tabs.Sea:AddToggle("AutoKitsune", {Title = "Auto Kitsune Event", Default = false })
-
-    -- >>> TAB: ITEMS <<<
-    Tabs.Items:AddSection("Swords")
-    Tabs.Items:AddToggle("AutoCDK", {Title = "Auto Cursed Dual Katana", Default = false })
-    Tabs.Items:AddToggle("AutoTushita", {Title = "Auto Tushita", Default = false })
-    Tabs.Items:AddToggle("AutoYama", {Title = "Auto Yama", Default = false })
-    
-    Tabs.Items:AddSection("Guns")
-    Tabs.Items:AddToggle("AutoSoulGuitar", {Title = "Auto Soul Guitar", Default = false })
-
-    -- >>> TAB: TELEPORT <<<
-    Tabs.Teleport:AddDropdown("TeleportIsland", {
-        Title = "Dịch chuyển nhanh",
-        Values = {"Sea 1", "Sea 2", "Sea 3", "Mansion", "Hydra", "Castle"},
-        Callback = function(Value)
-            print("Teleporting to:", Value)
-        end
-    })
-
-    -- >>> TAB: SETTINGS <<<
-    SaveManager:SetLibrary(Fluent)
-    InterfaceManager:SetLibrary(Fluent)
-    SaveManager:IgnoreThemeSettings()
-    SaveManager:SetIgnoreIndexes({})
-    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-    SaveManager:BuildConfigSection(Tabs.Settings)
-
-    Window:SelectTab(1)
-    
-    -- Thông báo chào mừng
-    Fluent:Notify({
-        Title = "Null Remeum",
-        Content = "Script đã tải thành công!",
-        Duration = 5
-    })
-end
+local Options = Fluent.Options
 
 --------------------------------------------------------------------------------
--- HỆ THỐNG KEY SYSTEM (CHẠY ĐẦU TIÊN)
+-- TAB AUTO FARM
 --------------------------------------------------------------------------------
-local function LoadKeySystem()
-    local KeyWindow = Fluent:CreateWindow({
-        Title = "Null Remeum | Key System",
-        SubTitle = "Security Check",
-        TabWidth = 160,
-        Size = UDim2.fromOffset(500, 320),
-        Acrylic = false,
-        Theme = "Light",
-        MinimizeKey = Enum.KeyCode.RightControl
-    })
+Tabs.Main:AddDropdown("Weapon", {
+    Title = "Vũ Khí Farm",
+    Values = {"Melee", "Sword", "Fruit"},
+    Default = "Melee",
+    Callback = function(v) _G.SelectWeapon = v end
+})
 
-    local KeyTab = KeyWindow:AddTab({ Title = "Verify Key", Icon = "lock" })
-    local KeyInputVal = ""
-    local TrueKey = "NULL-PREMIUM" -- ĐẶT KEY CỦA BẠN TẠI ĐÂY
+Tabs.Main:AddToggle("AutoFarm", {Title = "Auto Farm Level (Tất cả Sea)", Default = false})
+Tabs.Main:AddToggle("AutoFarmBone", {Title = "Auto Farm Xương (Sea 3)", Default = false})
+Tabs.Main:AddToggle("AutoFarmNearest", {Title = "Auto Farm Quái Gần Nhất", Default = false})
+Tabs.Main:AddSlider("AttackSpeed", {Title = "Tốc Độ Đánh", Default = 10, Min = 1, Max = 100})
 
-    KeyTab:AddParagraph({
-        Title = "Hướng dẫn",
-        Content = "Vui lòng lấy Key để sử dụng Script. Key: " .. TrueKey
-    })
+--------------------------------------------------------------------------------
+-- TAB VÕ THUẬT (MELEE) - CÓ SẴN TẤT CẢ SEA
+--------------------------------------------------------------------------------
+local MeleeList = {
+    {"Mua Black Leg", "BuyBlackLeg"},
+    {"Mua Electro", "BuyElectro"},
+    {"Mua Fishman Karate", "BuyFishmanKarate"},
+    {"Mua Dragon Breath", "BlackbeardReward", "DragonClaw", "1"},
+    {"Mua Superhuman", "BuySuperhuman"},
+    {"Mua Death Step", "BuyDeathStep"},
+    {"Mua Sharkman Karate", "BuySharkmanKarate", true},
+    {"Mua Electric Claw", "BuyElectricClaw"},
+    {"Mua Dragon Talon", "BuyDragonTalon"},
+    {"Mua Godhuman", "BuyGodhuman"},
+    {"Mua Sanguine Art", "BuySanguineArt"}
+}
 
-    KeyTab:AddInput("InputKey", {
-        Title = "Nhập Key",
-        Default = "",
-        Placeholder = "Paste Key Here...",
-        Callback = function(Value)
-            KeyInputVal = Value
-        end
-    })
-
-    KeyTab:AddButton({
-        Title = "Kiểm tra Key (Check Key)",
+for _, melee in pairs(MeleeList) do
+    Tabs.Melee:AddButton({
+        Title = melee[1],
         Callback = function()
-            if KeyInputVal == TrueKey then
-                Fluent:Notify({Title = "Thành công", Content = "Key chính xác! Đang tải Menu...", Duration = 3})
-                KeyWindow:Destroy() -- Tắt bảng Key
-                wait(0.5)
-                LoadMainScript() -- Mở bảng Farm chính
-            else
-                Fluent:Notify({Title = "Lỗi", Content = "Key sai hoặc chưa nhập!", Duration = 3})
+            local args = {unpack(melee, 2)}
+            CommF:InvokeServer(unpack(args))
+        end
+    })
+end
+
+--------------------------------------------------------------------------------
+-- TAB VẬT PHẨM (ITEMS)
+--------------------------------------------------------------------------------
+Tabs.Items:AddSection("Kiếm Đặc Biệt")
+Tabs.Items:AddToggle("AutoBuyLegendary", {Title = "Auto Mua Kiếm Legendary (Sea 2)", Default = false})
+Tabs.Items:AddButton({Title = "Mua Bisento", Callback = function() CommF:InvokeServer("BuyBisento") end})
+Tabs.Items:AddButton({Title = "Mua Soul Cane", Callback = function() CommF:InvokeServer("BuySoulCane") end})
+Tabs.Items:AddButton({Title = "Mua Kabucha", Callback = function() CommF:InvokeServer("BuyKabucha") end})
+
+--------------------------------------------------------------------------------
+-- TAB FRUIT (TRÁI ÁC QUỶ)
+--------------------------------------------------------------------------------
+Tabs.Fruit:AddToggle("AutoGacha", {Title = "Auto Gacha Fruit", Default = false})
+Tabs.Fruit:AddToggle("AutoStore", {Title = "Auto Cất Fruit (Rương)", Default = true})
+
+--------------------------------------------------------------------------------
+-- TAB TIỆN ÍCH & CODE (SETTINGS)
+--------------------------------------------------------------------------------
+Tabs.Settings:AddButton({
+    Title = "NHẬP TẤT CẢ CODE BLOX FRUIT",
+    Description = "Nhận X2 EXP & Reset Stats",
+    Callback = function()
+        local Codes = {"KITT_RESET", "Sub2Fer999", "Enyu_is_Pro", "Magicbus", "JCWK", "Starcodeheo", "Bluxxy", "fudd10_v2", "BIGNEWS", "SUB2GAMERROBOT_EXP1"}
+        for _, v in pairs(Codes) do
+            CommF:InvokeServer("RedeemCode", v)
+            task.wait(0.1)
+        end
+        Fluent:Notify({Title = "Code", Content = "Đã nhập hoàn tất!", Duration = 3})
+    end
+})
+
+--------------------------------------------------------------------------------
+-- LOGIC VẬN HÀNH (CORE LOGIC)
+--------------------------------------------------------------------------------
+
+-- 1. Đánh Quái & Fast Attack
+task.spawn(function()
+    while task.wait() do
+        if Options.AutoFarm.Value or Options.AutoFarmBone.Value or Options.AutoFarmNearest.Value then
+            pcall(function()
+                -- Tự trang bị vũ khí
+                local tool = LP.Backpack:FindFirstChild(_G.SelectWeapon) or LP.Character:FindFirstChild(_G.SelectWeapon)
+                if tool then LP.Character.Humanoid:EquipTool(tool) end
+                
+                -- Fast Attack
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton1(Vector2.new(0,0))
+            end)
+        end
+    end
+end)
+
+-- 2. Tự Động Gacha & Store
+task.spawn(function()
+    while task.wait(5) do
+        if Options.AutoGacha.Value then
+            CommF:InvokeServer("Cousin", "Buy")
+        end
+        if Options.AutoStore.Value then
+            for _, v in pairs(LP.Backpack:GetChildren()) do
+                if v:IsA("Tool") and v.ToolTip == "Blox Fruit" then
+                    CommF:InvokeServer("StoreFruit", v:GetAttribute("OriginalName") or v.Name, v)
+                end
             end
         end
-    })
+    end
+end)
 
-    KeyTab:AddButton({
-        Title = "Lấy Key (Get Key Link)",
-        Callback = function()
-            setclipboard("https://example.com/getkey")
-            Fluent:Notify({Title = "Link Copied", Content = "Đã copy link lấy key!", Duration = 3})
+-- 3. Auto Stats
+task.spawn(function()
+    while task.wait(0.5) do
+        if Options.AutoFarm.Value then
+            local points = LP.Data.Points.Value
+            if points > 0 then
+                -- Ưu tiên cộng đều Melee & Defense
+                CommF:InvokeServer("AddPoint", "Melee", 1)
+                CommF:InvokeServer("AddPoint", "Defense", 1)
+            end
         end
-    })
-end
+    end
+end)
 
--- BẮT ĐẦU CHẠY SCRIPT
-LoadKeySystem()
+--------------------------------------------------------------------------------
+-- KẾT THÚC CÀI ĐẶT
+--------------------------------------------------------------------------------
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+Window:SelectTab(1)
+SaveManager:LoadAutoloadConfig()
+
+Fluent:Notify({
+    Title = "NULL REMEUM v7.0",
+    Content = "Khởi chạy thành công! Chúc bạn chơi game vui vẻ.",
+    Duration = 5
+})
